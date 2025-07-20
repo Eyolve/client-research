@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents Full Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            overflow-x: auto;
+        }
+        
+        .figma-header {
+            background: #fff;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .figma-header .left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .figma-header .right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tab {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .share-btn {
+            background: #6366f1;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .canvas {
+            margin-top: 60px;
+            padding: 40px;
+            width: 4000px;
+            height: 100vh;
+            position: relative;
+            background: #f8f9fa;
+        }
+        
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 24px;
+            width: 900px;
+            position: absolute;
+            border: 2px solid transparent;
+        }
+        
+        .agent-card.build1 {
+            top: 20px;
+            left: 40px;
+            background: linear-gradient(135deg, #e8f4ff, #f0f8ff);
+            border-color: #4285f4;
+        }
+        
+        .agent-card.build2 {
+            top: 20px;
+            left: 980px;
+            background: linear-gradient(135deg, #ffeee8, #fff8f0);
+            border-color: #ff6b35;
+        }
+        
+        .agent-card.build3 {
+            top: 20px;
+            left: 1920px;
+            background: linear-gradient(135deg, #e8ffe8, #f0fff0);
+            border-color: #00c853;
+        }
+        
+        .agent-card.build4 {
+            top: 20px;
+            left: 2860px;
+            background: linear-gradient(135deg, #ffe8f4, #fff0f8);
+            border-color: #e91e63;
+        }
+        
+        .agent-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        
+        .agent-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+        
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .emoji {
+            font-size: 18px;
+        }
+        
+        .section-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #555;
+        }
+        
+        .workflow-container {
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .workflow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .workflow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .workflow-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .workflow-icon.user { background: #4285f4; }
+        .workflow-icon.bot { background: #333; }
+        .workflow-icon.tool { background: #00c853; }
+        .workflow-icon.email { background: #ea4335; }
+        .workflow-icon.phone { background: #34a853; }
+        .workflow-icon.whatsapp { background: #25d366; }
+        
+        .workflow-label {
+            font-size: 11px;
+            color: #666;
+            max-width: 80px;
+        }
+        
+        .workflow-arrow {
+            font-size: 20px;
+            color: #999;
+        }
+        
+        .usage-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .usage-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        .usage-list li:before {
+            content: "•";
+            color: #4285f4;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .tool-box {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid #4285f4;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .profile-pic {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .phone-visual {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .phone-icon {
+            width: 40px;
+            height: 40px;
+            background: #25d366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .workflow-complex {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .mini-workflow {
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="figma-header">
+        <div class="left">
+            <div style="display: flex; gap: 8px;">
+                <div style="width: 12px; height: 12px; background: #ff5f56; border-radius: 50%;"></div>
+                <div style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%;"></div>
+                <div style="width: 12px; height: 12px; background: #27ca3f; border-radius: 50%;"></div>
+            </div>
+            <div class="tab">🏠 AI Agents Full Guide</div>
+        </div>
+        <div class="right">
+            <div style="color: #666; font-size: 14px;">03:00</div>
+            <button class="share-btn">Share</button>
+        </div>
+    </div>
+
+    <div class="canvas">
+        <!-- Agent Build #1 -->
+        <div class="agent-card build1">
+            <div class="agent-header">AI Agent Build #1</div>
+            <div class="agent-subtitle">Sales Co-pilot Built With Relevance AI</div>
+            
+            <div class="section">
+                <div class="section-title">PURPOSE <span class="emoji">🎯</span></div>
+                <div class="section-content">
+                    To help sales reps prepare for calls better by creating handy research tools that collect data on prospects and their company from across the web, which can be used to generate a pre-call report for them to use before taking each call.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">VALUE <span class="emoji">💰</span></div>
+                <div class="section-content">
+                    When reps know more about the people they are speaking with it makes it much easier to build trust as the prospect feels the company has taken the time to prepare. Better preparation can also reveal effective angles to sell through as well. Ultimately, this should increase the conversion rate of the sales team.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">DESIGN <span class="emoji">🎨</span></div>
+                <div class="workflow-container">
+                    <div class="workflow">
+                        <div class="workflow-step">
+                            <div class="workflow-icon user">👨‍💻</div>
+                            <div class="workflow-label">Sales Rep</div>
+                        </div>
+                        <div class="workflow-arrow">→</div>
+                        <div class="workflow-step">
+                            <div class="workflow-icon bot">🤖</div>
+                            <div class="workflow-label">AI Agent</div>
+                        </div>
+                        <div class="workflow-arrow">→</div>
+                        <div class="tools-grid">
+                            <div class="tool-box">Tool 1: Company Research<br>Searches for company info and returns a summary</div>
+                            <div class="tool-box">Tool 2: Prospect Research<br>Searches for prospect info and returns a summary</div>
+                            <div class="tool-box">Tool 3: Pre-Call Report Generator<br>Takes the company and prospect research and generates a report</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">USAGE <span class="emoji">📋</span></div>
+                <ul class="usage-list">
+                    <li>10 mins before a sales call, the sale they open up the agent's URL on Relevance (see below) and check</li>
+                    <li>They provide the prospect's URL and get back the prospect research</li>
+                    <li>They provide the company URL and get back the company research</li>
+                    <li>Then they provide the prospect's LinkedIn URL and get back the prospect research</li>
+                    <li>Then they ask for a pre-call report, and it is generated for them to read</li>
+                </ul>
+            </div>
+            
+            <div class="profile-pic">L</div>
+        </div>
+
+        <!-- Agent Build #2 -->
+        <div class="agent-card build2">
+            <div class="agent-header">AI Agent Build #2</div>
+            <div class="agent-subtitle">Inbound Lead Qualification Agent Built on n8n</div>
+            
+            <div class="section">
+                <div class="section-title">PURPOSE <span class="emoji">🎯</span></div>
+                <div class="section-content">
+                    Companies who market themselves well soon have far too many people reaching out to them, many of which are not a good fit or 'qualified' for what they sell (e.g. they are too small or not the right industry). This process of researching a new lead and deciding whether or not to take a call is known as qualification, which is what this agent aims to automate.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">VALUE <span class="emoji">💰</span></div>
+                <div class="section-content">
+                    Instead of having to pay someone to manually qualify leads OR using arbitrary rules that may end up cutting out potentially valuable leads, this automation can immediately qualify and trigger the next steps for the sales team.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">DESIGN <span class="emoji">🎨</span></div>
+                <div class="workflow-container">
+                    <div class="workflow">
+                        <div class="workflow-step">
+                            <div class="workflow-icon tool">📝</div>
+                            <div class="workflow-label">On form submission</div>
+                        </div>
+                        <div class="workflow-arrow">→</div>
+                        <div class="workflow-step">
+                            <div class="workflow-icon tool">🌐</div>
+                            <div class="workflow-label">HTTP Request</div>
+                        </div>
+                        <div class="workflow-arrow">→</div>
+                        <div class="workflow-step">
+                            <div class="workflow-icon bot">🤖</div>
+                            <div class="workflow-label">AI Agent</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div class="workflow">
+                            <div class="workflow-step">
+                                <div class="workflow-icon tool">🔍</div>
+                                <div class="workflow-label">OpenAI Chat Model</div>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon email">📧</div>
+                                <div class="workflow-label">Gmail</div>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon tool">⚡</div>
+                                <div class="workflow-label">Call n8n Workflow Tool</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div class="workflow">
+                            <div class="workflow-step">
+                                <div class="workflow-icon email">📧</div>
+                                <div class="workflow-label">When Executed by Another Workflow</div>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon tool">🔍</div>
+                                <div class="workflow-label">OpenAI</div>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon tool">📊</div>
+                                <div class="workflow-label">IF</div>
+                            </div>
+                            <div class="workflow-arrow">→</div>
+                            <div class="workflow-step">
+                                <div class="workflow-icon email">📧</div>
+                                <div class="workflow-label">Gmail</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">USAGE <span class="emoji">📋</span></div>
+                <ul class="usage-list">
+                    <li>Person fills out the form with their details</li>
+                    <li>Relevance company researcher scrapes their website</li>
+                    <li>AI Agent looks at this information and determines based on the qualification criteria in the prompt if they are qualified or not.</li>
+                    <li>If they are, it calls the 2nd workflow which then classifies the lead into SaaS or Agency (e.g. route to different reps) and sends an email notification & summary</li>
+                    <li>If they are not qualified, it immediately responds to the lead asking if they would like to be connected to a partner to help them instead.</li>
+                </ul>
+            </div>
+            
+            <div class="profile-pic">L</div>
+        </div>
+
+        <!-- Agent Build #3 -->
+        <div class="agent-card build3">
+            <div class="agent-header">AI Agent Build #3</div>
+            <div class="agent-subtitle">AI Customer Support & Lead Generation Agent for Website & Phone Built on Voiceflow</div>
+            
+            <div class="section">
+                <div class="section-title">PURPOSE <span class="emoji">🎯</span></div>
+                <div class="section-content">
+                    This agent is designed to be able to answer questions from potential customers via a website chatbot and also via a phone number that can be called. Not only can it answer questions, but it can also generate instant quotes for interested parties. Finally, the agent is able to capture lead information for those who have been given a quote, this allows the sales team to follow up and set an appointment.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">VALUE <span class="emoji">💰</span></div>
+                <div class="section-content">
+                    Customers often want instant answers so they can make a purchase, by offering easy ways for them to get information we increase their chance of purchasing. Companies typically have to spend money on a customer support or sales team to get this done, but this agent can be a one-and-done solution, both helping increase sales while also saving the business money that would be spent on support.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">DESIGN <span class="emoji">🎨</span></div>
+                <div class="workflow-container">
+                    <div class="phone-visual">
+                        <div class="phone-icon">📞</div>
+                        <div class="workflow-step">
+                            <div class="workflow-icon bot">🤖</div>
+                            <div class="workflow-label">AI Agent</div>
+                        </div>
+                    </div>
+                    <div class="workflow-complex">
+                        <div class="mini-workflow">
+                            <strong>Tool 1: Answer From Knowledge Base 🧠</strong><br>
+                            <small>Can answer questions about the company based on docs provided</small>
+                        </div>
+                        <div class="mini-workflow">
+                            <strong>Tool 2: Generate Instant Quote 💰</strong><br>
+                            <small>If the prospect is interested in services or pricing, an instant quote can be generated which takes in their property type and size</small>
+                        </div>
+                        <div class="mini-workflow">
+                            <strong>Tool 3: Capture Lead Information 📝</strong><br>
+                            <small>When a prospect has been given a quotation, the agent can ask for their contact information and then logs it in the CRM</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">USAGE <span class="emoji">📋</span></div>
+                <ul class="usage-list">
+                    <li>Person arrives on website and either clicks to chat with the chatbot or enters the phone number into their phone</li>
+                    <li>The agent then determines what they are needing help with, and then routes them to the correct tool (knowledge base Q&A or instant quote)</li>
+                </ul>
+            </div>
+            
+            <div class="profile-pic">L</div>
+        </div>
+
+        <!-- Agent Build #4 -->
+        <div class="agent-card build4">
+            <div class="agent-header">AI Agent Build #4</div>
+            <div class="agent-subtitle">WhatsApp-Based AI Customer Support & Lead Generation Agent Built on Agentive</div>
+            
+            <div class="section">
+                <div class="section-title">PURPOSE <span class="emoji">🎯</span></div>
+                <div class="section-content">
+                    Same as the Voiceflow build, but this time on WhatsApp.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">VALUE <span class="emoji">💰</span></div>
+                <div class="section-content">
+                    Many people browsing for services are hesitant to use website contact forms or chatbots due to potential delays and not feeling like they are speaking to a real person. A WhatsApp option on a website or other triggers (e.g. a QR code) can open up more conversations through a more smartphone native platform to engage prospects in conversation, provide value (e.g. real time quotes) and collect lead information or better yet, set appointments.
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">DESIGN <span class="emoji">🎨</span></div>
+                <div class="workflow-container">
+                    <div class="phone-visual">
+                        <div style="width: 60px; height: 60px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">💰</div>
+                        <div class="workflow-step">
+                            <div class="workflow-icon bot">🤖</div>
+                            <div class="workflow-label">AI Agent</div>
+                        </div>
+                        <div style="width: 60px; height: 60px; background: #25d366; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">💬</div>
+                        </div>
+                    </div>
+                    <div class="workflow-complex">
+                        <div class="mini-workflow">
+                            <strong>Tool 1: Answer From Knowledge Base 🧠</strong><br>
+                            <small>Can answer questions about the company based on docs provided</small>
+                        </div>
+                        <div class="mini-workflow">
+                            <strong>Tool 2: Generate Instant Quote 💰</strong><br>
+                            <small>If the prospect is interested in services or pricing, an instant quote can be generated which takes in their property type and size</small>
+                        </div>
+                        <div class="mini-workflow">
+                            <strong>Tool 3: Capture Lead Information 📝</strong><br>
+                            <small>When a prospect has been given a quotation, the agent can ask for their contact information and then logs it in the CRM</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">USAGE <span class="emoji">📋</span></div>
+                <ul class="usage-list">
+                    <li>Prospect / customer finds the company's WhatsApp number on their website or elsewhere and starts a conversation</li>
+                    <li>Agent can answer from the knowledge base, generate a quote and capture lead information.</li>
+                </ul>
+            </div>
+            
+            <div class="profile-pic">L</div>
+        </div>
+    </div>
+</body>
+</html>
